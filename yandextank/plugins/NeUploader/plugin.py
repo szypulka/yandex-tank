@@ -124,15 +124,19 @@ class Plugin(AbstractPlugin, MonitoringDataListener):
                 #             )
                 # if case != self.OVERALL:
                 #     args.update(parent=self.get_metric_obj(col, self.OVERALL))
+                parent = self.get_metric_obj(col, self.OVERALL) if case != self.OVERALL else None
+                result_case = case if case != self.OVERALL else None
+                logger.error('Parent %s, case %s, result case %s', parent, case, result_case)
                 self.metrics_objs.setdefault(case, {})[col] = constructor(
                     dict(self.cfg.get('meta', {}),
                          name=col,
                          source='tank',
                          importance='high' if col in self.importance_high else ''),
                     raw=False, aggregate=True,
-                    parent=self.get_metric_obj(col, self.OVERALL) if case != self.OVERALL else None,
-                    case=case if case != self.OVERALL else None
+                    parent=parent,
+                    case=result_case
                 )
+        # logger.error('Metrics objs are %s', self.metrics_objs)
         return self.metrics_objs[case][col]
 
     def upload(self, df):
